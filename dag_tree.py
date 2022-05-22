@@ -194,3 +194,33 @@ def generate_igraph(root: Node, graph=Graph()):
         generate_igraph(sib, graph)
 
     return graph
+
+
+def generateNTree(n):
+    max_degree = 1
+    vertices = 1
+    root = Node(None, random(), random(), True)
+    siblings_number = randint(1, min(n, max_degree))
+    layer1 = []
+    for x in range(siblings_number):
+        layer1.append(Node(root, random(), random(), True))
+        vertices += 1
+    root.siblings.extend(layer1)
+
+    root_layer = [root]
+    while vertices < n:
+        root_candidates = []
+        for i_root in root_layer:
+            for sib in i_root.siblings:
+                siblings_number = randint(1, min(n - vertices + 1, max_degree))
+                layer1 = []
+                for x in range(siblings_number):
+                    layer1.append(Node(sib, random(), random(), True))
+                    vertices += 1
+                    if vertices == n:
+                        sib.siblings.extend(layer1)
+                        return root
+                sib.siblings.extend(layer1)
+                root_candidates.append(sib)
+        root_layer = root_candidates
+    return root
