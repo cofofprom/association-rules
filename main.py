@@ -6,16 +6,19 @@ from igraph import Graph, plot
 import pickle
 import matplotlib.pyplot as plt
 
-TRANSACTION_LENGTH = 10
-TRANSACTION_NUMBER = 500000
-MAX_TEST_COUNT = 500
-MIN_SUPPORT = 0.3
-MIN_CONFIDENCE = 0.5
-AVERAGE_LOSS_ITER = 100
-TEST_STEP = MAX_TEST_COUNT // 50
+TRANSACTION_LENGTH = 10 # number of possible items
+TRANSACTION_NUMBER = 500000 # number of transactions for generation true rules
+MAX_TEST_COUNT = 500 # max transaction number for precision and recall measure
+MIN_SUPPORT = 0.3 # minsup
+MIN_CONFIDENCE = 0.5 # minconf
+AVERAGE_LOSS_ITER = 100 # number of replications for measuring median precision and recall
+TEST_STEP = MAX_TEST_COUNT // 50 # precision and recall measure number of transactions step
 
 
 def generateRules(dataset):
+    """
+    Generates association rules from a given transaction dataset
+    """
     apriori_result = apriori(dataset, min_support=MIN_SUPPORT, min_confidence=MIN_CONFIDENCE)
     association_rules_inner = []
     sets = set()
@@ -32,6 +35,9 @@ def generateRules(dataset):
 
 
 def generate_transactions(model, count):
+    """
+    Generates count transactions by a given DAG model
+    """
     transaction_dataset_inner = []
     for i in range(count):
         transaction = generateTransaction(model, [])
@@ -44,19 +50,17 @@ def generate_transactions(model, count):
 
 
 if __name__ == '__main__':
-    root = pickle.load(open('path_graph', 'rb'))
-    #root = generateNTree(TRANSACTION_LENGTH)
-    numerate_graph(root, [0])
+    root = pickle.load(open('path_graph', 'rb')) # load saved graph
+    #root = generateNTree(TRANSACTION_LENGTH) # or generate a new one
     g = Graph()
     g.add_vertex(0, color='green')
     generate_igraph(root, g)
     pickle.dump(root, open("lastgraph", 'wb'))
-    layout = g.layout_reingold_tilford(mode="in", root=0)
+    layout = g.layout_reingold_tilford(mode="in", root=0) # creates graph.png with proper colors
     p = plot(g, target="graph.png", layout=layout, vertex_label=g.vs['name'], vertex_color=g.vs['color'])
     print("Graph generated")
-    print("root p10", root.p10)
 
-    transaction_dataset = generate_transactions(root, TRANSACTION_NUMBER)
+    transaction_dataset = generate_transactions(root, TRANSACTION_NUMBER) # dataset for true associacion rules mining
 
     true_association_rules, true_set = generateRules(transaction_dataset)
 
@@ -65,15 +69,15 @@ if __name__ == '__main__':
 
     print("True association rules count:", len(true_association_rules))
 
-    x = [i for i in range(0, MAX_TEST_COUNT + 1, TEST_STEP)]
+    x = [i for i in range(0, MAX_TEST_COUNT + 1, TEST_STEP)] # number of transactions for measuring accuracy of algo
     y = []
     precision_l = []
     recall_l = []
-    for tran_num in x:
+    for tran_num in x: # for specific number of transactions
         AVG_LOSS = []
         AVG_PRECISION = []
         AVG_RECALL = []
-        for _ in range(AVERAGE_LOSS_ITER):
+        for _ in range(AVERAGE_LOSS_ITER): # does replications and count precision and recall
             test_dataset = generate_transactions(root, tran_num)
             association_rules, specific_set = generateRules(test_dataset)
             recall = len(specific_set.intersection(true_set)) / (len(true_set) + 0.00001)
@@ -87,7 +91,7 @@ if __name__ == '__main__':
 
             AVG_LOSS.append(loss)
         print(f'#{tran_num} completed...')
-        AVG_LOSS = np.median(AVG_LOSS)
+        AVG_LOSS = np.median(AVG_LOSS) # find median value
         AVG_PRECISION = np.median(AVG_PRECISION)
         AVG_RECALL = np.median(AVG_RECALL)
         y.append(AVG_LOSS)
@@ -96,7 +100,7 @@ if __name__ == '__main__':
 
     print("Max precision:", max(precision_l))
     print("Max recall:", max(recall_l))
-    fig = plt.plot(x, recall_l, label='linear', marker='o', color="green")
+    fig = plt.plot(x, recall_l, label='linear', marker='o', color="green") # graphs
     plt.ylabel('Recall')
     plt.title('T/Recall')
     plt.show()
