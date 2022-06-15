@@ -64,10 +64,11 @@ def generateNTree(n):
     """
     Function generates random tree with n verices
     """
-    max_degree = 1
+    max_degree = 5
     vertices = 1
     root = Node(None, random(), random(), True)
     siblings_number = randint(1, min(n, max_degree))
+    #siblings_number = n - 1
     layer1 = []
     for x in range(siblings_number):
         layer1.append(Node(root, random(), random(), True))
@@ -86,6 +87,7 @@ def generateNTree(n):
                     vertices += 1
                     if vertices == n:
                         sib.siblings.extend(layer1)
+                        numerate_graph(root, [0])
                         return root
                 sib.siblings.extend(layer1)
                 root_candidates.append(sib)

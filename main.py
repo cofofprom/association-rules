@@ -6,11 +6,11 @@ from igraph import Graph, plot
 import pickle
 import matplotlib.pyplot as plt
 
-TRANSACTION_LENGTH = 10 # number of possible items
+TRANSACTION_LENGTH = 20 # number of possible items
 TRANSACTION_NUMBER = 500000 # number of transactions for generation true rules
 MAX_TEST_COUNT = 500 # max transaction number for precision and recall measure
-MIN_SUPPORT = 0.3 # minsup
-MIN_CONFIDENCE = 0.5 # minconf
+MIN_SUPPORT = 0.5 # minsup
+MIN_CONFIDENCE = 0.7 # minconf
 AVERAGE_LOSS_ITER = 100 # number of replications for measuring median precision and recall
 TEST_STEP = MAX_TEST_COUNT // 50 # precision and recall measure number of transactions step
 
@@ -50,8 +50,8 @@ def generate_transactions(model, count):
 
 
 if __name__ == '__main__':
-    root = pickle.load(open('path_graph', 'rb')) # load saved graph
-    #root = generateNTree(TRANSACTION_LENGTH) # or generate a new one
+    #root = pickle.load(open('path_graph', 'rb')) # load saved graph
+    root = generateNTree(TRANSACTION_LENGTH) # or generate a new one
     g = Graph()
     g.add_vertex(0, color='green')
     generate_igraph(root, g)
